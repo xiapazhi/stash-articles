@@ -1,0 +1,8 @@
+name: 手机筛选操作优化
+description: 仅优化 Stash v0.32.0 主列表的移动端操作，保留主题和桌面界面。
+version: 1.0.0
+ui:
+  javascript:
+    - mobileFilters.js
+  css:
+    - mobileFilters.css

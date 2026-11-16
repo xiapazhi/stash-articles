@@ -1,0 +1,290 @@
+/* All colors and fonts come from Stash's own Bootstrap components and theme. */
+@media (max-width: 767px) {
+  .smf-enabled .sidebar-toggle-button-container {
+    display: none;
+  }
+
+  .smf-enabled .sidebar-pane-content {
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Keep the native lightbox callback and selection behavior; enlarge its hit area. */
+  .smf-enabled .image-card-preview .preview-button .btn {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
+  }
+
+  .smf-playback .modal-header .close {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .smf-playback .modal-content {
+    max-height: 90dvh;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .smf-playback .modal-body {
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  .smf-enabled .smf-toolbar {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    margin: 0 0 .5rem;
+    padding: .5rem 0;
+  }
+
+  /* Stash places navigation at the top above 575px and in phone landscape. */
+  @media (min-width: 576px), (orientation: landscape) {
+    .smf-enabled .smf-toolbar {
+      top: 48.75px;
+    }
+  }
+
+  .smf-search-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+
+  .smf-native-toolbar {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .smf-native-toolbar .filtered-list-toolbar {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .smf-native-toolbar .filtered-list-toolbar > :not(.search-term-input) {
+    display: none !important;
+  }
+
+  .smf-native-toolbar .search-term-input {
+    display: flex !important;
+    width: 100%;
+    margin: 0;
+    flex: 1;
+  }
+
+  .smf-enabled .smf-search-row .btn,
+  .smf-enabled .smf-search-row input,
+  .smf-enabled .smf-selection .btn {
+    min-height: 44px;
+  }
+
+  .smf-search-row input {
+    font-size: 16px;
+    min-width: 0;
+  }
+
+  .smf-search-row .list-operations {
+    flex: 0 0 auto;
+  }
+
+  .smf-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: .5rem;
+  }
+
+  .smf-actions .smf-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: .5rem;
+  }
+
+  .smf-action span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .smf-enabled .filter-tags {
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    gap: .4rem;
+    padding-bottom: .25rem;
+  }
+
+  .smf-enabled .filter-tags > * {
+    flex-shrink: 0;
+  }
+
+  .smf-enabled .filter-tags .tag-item .btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .smf-enabled .filter-tags .clear-all-button {
+    min-height: 44px;
+    padding: .5rem;
+  }
+
+  .smf-sheet .modal-dialog {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  .smf-sheet.fade .modal-dialog {
+    transform: translateY(100%);
+    transition: transform .2s ease-out;
+  }
+
+  .smf-sheet.show .modal-dialog {
+    transform: translateY(0);
+  }
+
+  .smf-sheet .modal-content {
+    max-height: 85vh;
+    max-height: 85dvh;
+    border-radius: 1rem 1rem 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .smf-sheet .modal-header,
+  .smf-sheet .modal-footer {
+    flex-shrink: 0;
+  }
+
+  .smf-sheet .modal-title {
+    font-size: 1.15rem;
+  }
+
+  .smf-sheet .modal-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    min-height: 0;
+  }
+
+  .smf-sheet .modal-header .close {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .smf-sheet .btn,
+  .smf-sheet select,
+  .smf-sheet input:not([type="range"]),
+  .smf-sheet .sidebar-section .collapse-button {
+    min-height: 44px;
+  }
+
+  .smf-sheet input,
+  .smf-sheet select {
+    font-size: 16px;
+  }
+
+  .smf-sheet .sidebar.smf-native-filter {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  .smf-native-filter .sidebar-search-container,
+  .smf-native-filter .edit-filter-button,
+  .smf-native-filter .sidebar-footer {
+    display: none !important;
+  }
+
+  .smf-caption {
+    margin-bottom: .75rem;
+    font-size: .85rem;
+  }
+
+  .smf-sheet .smf-advanced {
+    width: 100%;
+    margin-bottom: .75rem;
+  }
+
+  .smf-sheet .modal-footer {
+    display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  .smf-sheet .modal-footer .btn {
+    flex: 1;
+    margin: 0;
+    white-space: nowrap;
+  }
+
+  .smf-result-state {
+    flex: 0 0 100%;
+    font-size: .85rem;
+  }
+
+  .smf-options,
+  .smf-display-options {
+    display: grid;
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+
+  .smf-options .smf-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+  }
+
+  .smf-option.selected {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+  }
+
+  .smf-direction,
+  .smf-display-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .5rem;
+    margin-bottom: 1rem;
+  }
+
+  .smf-sheet h3 {
+    margin: .5rem 0 .75rem;
+    font-size: 1rem;
+  }
+
+  .smf-wide {
+    width: 100%;
+  }
+
+  .smf-sheet input[type="range"] {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .smf-sheet.fade .modal-dialog {
+      transition: none;
+    }
+  }
+}

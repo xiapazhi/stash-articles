@@ -1,0 +1,363 @@
+.articles-page {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.articles-header,
+.articles-reader-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.articles-header {
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.articles-header > div:first-child {
+  min-width: 0;
+}
+
+.articles-toolbar {
+  display: flex;
+  flex-shrink: 0;
+  gap: .5rem;
+}
+
+.articles-toolbar .btn {
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+.articles-open-drawer {
+  display: none;
+}
+
+.articles-header h1 {
+  margin-bottom: .35rem;
+  font-size: 1.8rem;
+}
+
+.articles-summary,
+.articles-path,
+.articles-detected {
+  opacity: .7;
+  overflow-wrap: anywhere;
+  font-size: .85rem;
+}
+
+.articles-summary {
+  margin-bottom: 0;
+}
+
+.articles-layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  border-top: 1px solid rgba(160, 160, 160, .3);
+  min-height: 60vh;
+}
+
+.articles-sidebar {
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 1rem 1rem 1rem 0;
+  border-right: 1px solid rgba(160, 160, 160, .3);
+}
+
+.articles-source {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .75rem;
+  opacity: .6;
+  margin: 0 .85rem 1rem;
+}
+
+.articles-item {
+  display: block;
+  width: 100%;
+  padding: .85rem;
+  margin-bottom: .4rem;
+  background: transparent;
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.articles-item:hover,
+.articles-item.selected {
+  background: rgba(191, 173, 136, .12);
+  border-color: rgba(191, 173, 136, .4);
+}
+
+.articles-item-title,
+.articles-item-folder {
+  display: block;
+}
+
+.articles-item-folder {
+  margin-top: .3rem;
+  opacity: .65;
+  font-size: .8rem;
+}
+
+.articles-reader {
+  min-width: 0;
+  padding: 1.5rem 0 1.5rem 2rem;
+}
+
+.articles-reader h2 {
+  font-size: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.articles-encoding {
+  display: block;
+  margin-top: .85rem;
+  font-size: .8rem;
+}
+
+.articles-reading-options {
+  flex-shrink: 0;
+}
+
+.articles-reader-directory,
+.articles-reading-options summary .fa-icon {
+  display: none;
+}
+
+@media (min-width: 701px) {
+  .articles-reading-settings {
+    display: contents;
+  }
+}
+
+.articles-reading-options summary {
+  cursor: pointer;
+  font-size: .85rem;
+  padding: .5rem .75rem;
+  border: 1px solid rgba(160, 160, 160, .35);
+  border-radius: 6px;
+}
+
+.articles-encoding select {
+  margin-top: .35rem;
+  max-width: 220px;
+  font-size: .85rem;
+}
+
+.articles-content {
+  max-width: 48em;
+  margin: 1.5rem auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+  font-size: 1.125rem;
+  line-height: 1.95;
+  letter-spacing: .025em;
+  tab-size: 4;
+}
+
+.articles-empty {
+  padding: 2rem 0;
+  opacity: .7;
+}
+
+.articles-page button:focus-visible,
+.articles-page select:focus-visible,
+.articles-reading-options summary:focus-visible,
+.articles-content:focus-visible {
+  outline: 2px solid #bfad88;
+  outline-offset: 3px;
+}
+
+.articles-drawer .modal-dialog {
+  width: min(88vw, 360px);
+  max-width: none;
+  height: 100%;
+  height: 100dvh;
+  margin: 0;
+}
+
+.articles-drawer.fade .modal-dialog {
+  transform: translateX(-100%);
+  transition: transform .22s ease-out;
+}
+
+.articles-drawer.show .modal-dialog {
+  transform: translateX(0);
+}
+
+.articles-drawer .modal-content {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 8px 0 30px rgba(0, 0, 0, .2);
+}
+
+.articles-drawer .modal-header,
+.articles-drawer .modal-footer {
+  flex-shrink: 0;
+}
+
+.articles-drawer .modal-title {
+  font-size: 1.25rem;
+}
+
+.articles-drawer .modal-header .close {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.articles-drawer .modal-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.articles-drawer-count {
+  margin-bottom: .35rem;
+  font-size: .85rem;
+  opacity: .7;
+}
+
+.articles-drawer .articles-source {
+  margin: 0 0 1rem;
+}
+
+.articles-drawer .modal-footer {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+.articles-drawer .modal-footer .btn {
+  min-height: 44px;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .articles-drawer.fade .modal-dialog {
+    transition: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .articles-page {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 48.75px - .5rem);
+    height: calc(100dvh - 48.75px - .5rem);
+    padding: .25rem .75rem;
+    padding-bottom: calc(.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .articles-header {
+    display: none;
+  }
+
+  .articles-refresh,
+  .articles-sidebar {
+    display: none;
+  }
+
+  .articles-layout {
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+    border-top: 0;
+  }
+
+  .articles-reader {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .articles-reader-header {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: .25rem;
+    min-height: 48px;
+    position: relative;
+    border-bottom: 1px solid rgba(160, 160, 160, .3);
+  }
+
+  .articles-reader-title {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .articles-reader-title h2 {
+    margin: 0;
+    font-size: 1rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .articles-reader-title .articles-path,
+  .articles-reading-options summary span {
+    display: none;
+  }
+
+  .articles-reader-directory,
+  .articles-reading-options summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+
+  .articles-reading-options summary {
+    list-style: none;
+  }
+
+  .articles-reading-options summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .articles-reading-options summary .fa-icon {
+    display: inline-block;
+  }
+
+  .articles-reading-settings {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 20;
+    width: min(280px, calc(100vw - 1.5rem));
+    padding: .75rem;
+  }
+
+  .articles-reading-settings .articles-encoding,
+  .articles-reading-settings .articles-detected {
+    margin: 0;
+  }
+
+  .articles-reading-settings select {
+    min-height: 44px;
+    max-width: 100%;
+    margin-bottom: .5rem;
+    font-size: 16px;
+  }
+
+  /* Scroll only the text so both reading controls and the directory button stay visible. */
+  .articles-content {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    margin: .75rem auto 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+}

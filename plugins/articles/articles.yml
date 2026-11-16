@@ -1,0 +1,13 @@
+name: 文章 · TXT 阅读器
+description: 只读浏览指定目录及子目录中的 TXT 文件，支持常见中文编码。
+version: 1.1.0
+exec:
+  - python3
+  - "{pluginDir}/articles.py"
+interface: raw
+errLog: info
+ui:
+  javascript:
+    - articles.js
+  css:
+    - articles.css

@@ -1,0 +1,13 @@
+{
+  "name": "stash-articles",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Independent TXT reader and mobile UI plugins for Stash v0.32.0",
+  "scripts": {
+    "test": "python3 -B -m unittest discover -s plugins/articles -p 'test_*.py' && node --check plugins/articles/articles.js && node --check plugins/mobileFilters/mobileFilters.js && node plugins/mobileFilters/test-mobile.cjs"
+  },
+  "devDependencies": {
+    "react": "18.3.1",
+    "react-test-renderer": "18.3.1"
+  }
+}
