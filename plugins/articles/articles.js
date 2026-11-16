@@ -7,7 +7,7 @@
   const { Button, Alert, Modal, Nav } = api.libraries.Bootstrap;
   const { NavLink } = api.libraries.ReactRouterDOM;
   const Icon = api.components.Icon;
-  const { faFileAlt, faList, faSliders } = api.libraries.FontAwesomeSolid;
+  const { faFileAlt, faList, faSliders, faSyncAlt } = api.libraries.FontAwesomeSolid;
   const operationDocument = api.libraries.Apollo.gql`
     mutation ReadArticles($args: Map!) {
       runPluginOperation(plugin_id: "articles", args: $args)
@@ -48,8 +48,7 @@
     return h("section", { className: "articles-reader", "aria-label": "文章正文", "aria-busy": loading },
       h("header", { className: "articles-reader-header" },
         h("div", { className: "articles-reader-title" },
-          h("h2", null, selectedPath ? selectedPath.split("/").pop() : "选择一篇文章"),
-          selectedPath && h("p", { className: "articles-path" }, selectedPath)),
+          h("h2", { title: selectedPath || undefined }, selectedPath ? selectedPath.split("/").pop() : "选择一篇文章")),
         h(Button, {
           variant: "secondary", className: "articles-reader-directory",
           "aria-label": "选择文章", "aria-haspopup": "dialog", "aria-expanded": drawerOpen,
@@ -167,31 +166,19 @@
       setRefresh((value) => value + 1);
     }
 
-    return h("main", { className: "articles-page" },
-      h("header", { className: "articles-header" },
-        h("div", null,
-          h("h1", null, "文章"),
-          h("p", { className: "articles-summary" }, `${articles.length} 篇文章`)),
-        h("div", { className: "articles-toolbar" },
-          h(Button, {
-            variant: "secondary",
-            className: "articles-open-drawer",
-            "aria-haspopup": "dialog",
-            "aria-expanded": drawerOpen,
-            onClick: () => setDrawerOpen(true),
-          }, "选择文章"),
-          h(Button, {
-            variant: "secondary",
-            className: "articles-refresh",
-            disabled: listLoading,
-            onClick: refreshArticles,
-          }, listLoading ? "正在加载…" : "刷新列表"))),
+    return h("main", { className: "articles-page", "aria-label": "文章阅读" },
       listError && h(Alert, { variant: "danger", role: "alert" }, listError),
       !listLoading && !listError && articles.length === 0 &&
         h("p", { className: "articles-empty", role: "status" }, "此目录及子目录中没有 TXT 文件。"),
       h("div", { className: "articles-layout" },
         h("aside", { className: "articles-sidebar", "aria-label": "文章目录" },
-          root && h("p", { className: "articles-source", title: root }, root),
+          h("header", { className: "articles-sidebar-header" },
+            h("h2", { title: root || undefined }, "目录", h("span", null, `${articles.length} 篇`)),
+            h(Button, {
+              variant: "secondary", className: "articles-refresh",
+              disabled: listLoading, onClick: refreshArticles,
+              title: "刷新目录", "aria-label": listLoading ? "正在加载目录" : "刷新目录",
+            }, h(Icon, { icon: faSyncAlt, "aria-hidden": true }))),
           h(ArticleList, { articles, selectedPath, onSelect: selectArticle })),
         h(ReadingPane, {
           selectedPath, article, loading: readLoading, error: readError,

@@ -62,7 +62,7 @@ The Articles entry opens `/articles` in Stash.
 - Browse TXT files recursively, including nested directories.
 - Read UTF-8, GB18030, Big5, and BOM-marked UTF-16 files, with manual encoding selection when needed.
 - Open the directory drawer on phones; use the sidebar on desktop.
-- Keep a compact title and controls visible while scrolling the text on phones.
+- Keep a compact title and controls visible while reading. On desktop, the directory and text scroll independently; full paths are available in title tooltips.
 - Read files without editing, uploading, renaming, or deleting them.
 
 The reader supports files up to **20 MiB** and lists up to **10,000 articles**. It rejects path traversal, symbolic links, and special files. It does not create Stash media records.
