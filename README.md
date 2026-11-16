@@ -1,54 +1,97 @@
 # stash-articles
 
-面向 **Stash v0.32.0** 的两个独立插件，可分别安装、禁用和删除。当前为本机预览版本，尚未完成实体手机与完整浏览器回归。
+English | [简体中文](README.zh-CN.md)
 
-| 插件目录 | 功能 |
+A TXT reader and a mobile interface plugin for [Stash](https://github.com/stashapp/stash). Install either plugin independently, or use both together.
+
+| Plugin | Description |
 | --- | --- |
-| `plugins/articles` | 导航增加“文章”入口，只读浏览嵌套目录中的 TXT，支持常见中文编码和手机目录抽屉 |
-| `plugins/mobileFilters` | 手机列表的筛选、排序和显示底部面板，以及图片放大、视频弹窗播放入口 |
+| [Articles](plugins/articles) | Read TXT files from nested directories directly in Stash. |
+| [Mobile UI](plugins/mobileFilters) | Touch-friendly filters, sorting, display controls, and media playback shortcuts. |
 
-仓库仅包含插件源代码和测试，不包含 Stash 本体、数据库、媒体素材、服务器配置或凭据。
+## Requirements
 
-## 安装
+- Stash v0.32.0.
+- Python 3 for the Articles plugin, running on Linux or macOS. Native Windows is not supported by the reader.
+- The plugins currently use Chinese interface labels.
 
-1. 将需要的目录复制到 Stash 配置目录下的 `plugins/`，保持目录名 `articles`、`mobileFilters` 不变。
-2. 文章插件需要 Python 3，并需要编辑 `articles/reader.json`，将 `root` 指向 Stash 进程可见的 TXT 根目录。默认 `/data/文本` 是容器内路径，不是宿主机路径。
-3. Docker 中需事先挂载文章目录，建议使用只读挂载。文章不需要加入 Stash 媒体扫描目录。
-4. 在 Stash“设置 → 插件”重新加载插件，然后刷新浏览器。
+No frontend build or npm installation is required to use the plugins.
 
-UI 插件不需要构建或安装 npm 运行时依赖。没有注册社区插件源，当前安装方式为手动复制。
+## Installation
 
-## 文章阅读
+1. Download this repository, or clone it:
 
-- 导航地址 `/articles`，沿用原生图标和导航布局。
-- 递归列出 TXT，支持 UTF-8、GB18030、Big5 及带 BOM 的 UTF-16；编码可手动选择。
-- 手机端为紧凑标题、目录图标和设置图标；正文独立滚动。桌面保留侧边目录。
-- 不编辑原文件，不上传、重命名或删除文件，不扫描媒体或创建媒体数据库记录。
-- 单篇最多 20 MiB，最多列出 10000 篇；拒绝目录越界、符号链接和特殊文件。
-- 面向 Linux/macOS，不支持原生 Windows。读取可能由文件系统更新访问时间，正文和修改时间不变。
-- 能访问 Stash 的用户可以读取配置根目录内所有 TXT；插件沿用 Stash 登录权限，没有单独文章权限。
+   ```sh
+   git clone https://github.com/xiapazhi/stash-articles.git
+   ```
 
-## 手机列表操作
+2. Copy the plugin directories you want into your Stash configuration directory:
 
-- 宽度小于 768px 时生效，仅覆盖短片、图片、图库、集合、演员、工作室、标签和标记主列表。
-- 搜索保留原生逻辑；筛选、排序、显示采用带文字入口及底部面板。
-- 常用筛选即时生效；重置只清除条件，保留搜索、排序和视图；高级条件沿用官方应用/取消流程。
-- 筛选操作栏吸顶，已选条件横向滚动，批量选择保留原生工具栏。
-- 图片网格中点击缩略图打开原生放大查看；点击标题进入信息页。
-- 短片网格中点击缩略图弹出原生播放器；点击标题进入详情页。选择模式保持原行为。
-- 桌面列表、详情页和文章插件不受移动端插件布局影响。
+   ```text
+   <stash-config>/plugins/
+   ├── articles/
+   │   ├── articles.yml
+   │   ├── articles.py
+   │   ├── articles.js
+   │   ├── articles.css
+   │   └── reader.json
+   └── mobileFilters/
+       ├── mobileFilters.yml
+       ├── mobileFilters.js
+       └── mobileFilters.css
+   ```
 
-## 开发检查
+   Keep the directory and manifest names unchanged. The two plugins can be enabled or disabled separately.
 
-Python 测试只使用临时文件。React 测试使用组件替身，不代表实际浏览器已通过。
+3. For Articles, edit `articles/reader.json` to select your TXT directory:
+
+   ```json
+   {
+     "root": "/data/文本"
+   }
+   ```
+
+   Use an absolute path accessible to the Stash process. When using Docker, this is a **container path**: mount your TXT directory into the container first. A read-only mount is recommended. There is no need to add TXT files to Stash's media library or scan them.
+
+4. Reload plugins in **Settings → Plugins**, then refresh the browser.
+
+## Articles
+
+The Articles entry opens `/articles` in Stash.
+
+- Browse TXT files recursively, including nested directories.
+- Read UTF-8, GB18030, Big5, and BOM-marked UTF-16 files, with manual encoding selection when needed.
+- Open the directory drawer on phones; use the sidebar on desktop.
+- Keep a compact title and controls visible while scrolling the text on phones.
+- Read files without editing, uploading, renaming, or deleting them.
+
+The reader supports files up to **20 MiB** and lists up to **10,000 articles**. It rejects path traversal, symbolic links, and special files. It does not create Stash media records.
+
+Anyone with access to your Stash instance can read TXT files under the configured root. The plugin uses Stash's access control and does not add separate article permissions. File contents and modification times are preserved; the filesystem may update access times.
+
+## Mobile UI
+
+Mobile UI applies at viewport widths **below 768px** to the main lists for scenes, images, galleries, groups, performers, studios, tags, and scene markers.
+
+- Sticky search, filter, sort, and display controls with touch-friendly buttons.
+- Bottom sheets for filters, sorting, view modes, card size, and page size.
+- Immediate updates for common filters; advanced filters retain Stash's Apply/Cancel workflow.
+- Reset filter criteria while keeping the search term, sort order, and display mode.
+- Horizontally scrollable active filter chips and native bulk-selection controls.
+- Tap an image thumbnail in grid view to open Stash's lightbox; tap its title for details.
+- Tap a scene thumbnail in grid view to open the native player in a modal; tap its title for details.
+
+Desktop layouts and detail pages retain their native behavior. The Mobile UI plugin does not change the Articles layout.
+
+## Development
 
 ```sh
 npm install
 npm test
 ```
 
-已做组件和只读后端检查。本机预览反馈中修复过补丁参数与 Fragment 样式作用域问题；尚待检查实体 iPhone Safari、Android、软键盘、真实滚动与播放行为。Stash 插件 API 是实验性接口，升级后需要重新验证。
+The test suite covers the read-only TXT backend and mobile React component behavior. The plugins use Stash's experimental plugin API; check compatibility when upgrading Stash.
 
-## 禁用与删除
+## Uninstall
 
-在 Stash 中禁用相应插件并刷新页面即可恢复。完全卸载时，只删除相应插件目录并重新加载，保留自己的媒体和文章目录。
+Disable the plugin in Stash and refresh the browser. To remove it completely, delete its directory from `<stash-config>/plugins/` and reload plugins. Keep your media and TXT directories.
