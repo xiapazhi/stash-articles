@@ -1,3 +1,83 @@
+/* Keep the image title and native collection controls on one compact row. */
+.image-list .image-card.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+}
+
+.image-list .image-card > .thumbnail-section {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.image-list .image-card > .card-section {
+  display: contents;
+}
+
+.image-list .image-card .card-section > a {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  min-width: 0;
+  padding: .5rem .75rem;
+}
+
+.image-list .image-card .card-section-title {
+  margin: 0;
+  font-size: .9rem;
+  line-height: 1.4;
+}
+
+.image-list .image-card .card-section-title .TruncatedText {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.image-list .image-card > .card-popovers {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  max-width: 10rem;
+  margin: 0;
+  padding: .25rem .5rem .25rem 0;
+  overflow-x: auto;
+}
+
+.image-list .image-card > .card-popovers .btn {
+  min-width: 36px;
+  min-height: 36px;
+  padding: .25rem;
+}
+
+.image-list .image-card > hr {
+  display: none;
+}
+
+.image-list .image-card .image-card__details {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  min-width: 0;
+  padding: 0 .75rem;
+}
+
+.image-list .image-card .image-card__date:empty {
+  display: none;
+}
+
+.image-list .image-card .image-card-preview {
+  margin-bottom: 0;
+}
+
+@media (max-width: 767px) {
+  .image-list .image-card > .card-popovers .btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
 /* All colors and fonts come from Stash's own Bootstrap components and theme. */
 @media (max-width: 767px) {
   .smf-enabled .sidebar-toggle-button-container {
