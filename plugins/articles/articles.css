@@ -27,7 +27,7 @@
 }
 
 .articles-sidebar {
-  padding-right: .75rem;
+  padding-right: 1rem;
   border-right: 1px solid rgba(160, 160, 160, .3);
 }
 
@@ -40,8 +40,9 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  gap: .5rem;
-  min-height: 48px;
+  gap: .75rem;
+  min-height: 52px;
+  padding: .5rem;
   border-bottom: 1px solid rgba(160, 160, 160, .3);
 }
 
@@ -57,7 +58,10 @@
 }
 
 .articles-sidebar-header h2 span {
-  margin-left: .75rem;
+  margin-left: .5rem;
+  padding: .15rem .4rem;
+  border-radius: 4px;
+  background: rgba(160, 160, 160, .08);
   opacity: .65;
   font-size: .85rem;
   font-weight: normal;
@@ -78,24 +82,53 @@
   text-overflow: ellipsis;
 }
 
-.articles-refresh,
-.articles-reader-directory,
-.articles-reading-options summary {
+.articles-page .articles-action {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
+  gap: .5rem;
+  box-sizing: border-box;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 .75rem;
+  color: inherit;
+  background: transparent;
+  border: 1px solid rgba(160, 160, 160, .22);
+  border-radius: 6px;
+  font-size: .85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
 }
 
-.articles-refresh,
-.articles-reader-directory {
-  width: 44px;
+.articles-page .articles-action:hover,
+.articles-page .articles-action:not(:disabled):not(.disabled):active,
+.articles-reading-options[open] > .articles-action {
+  color: inherit;
+  background: rgba(160, 160, 160, .1);
+  border-color: rgba(160, 160, 160, .4);
+}
+
+.articles-page .articles-action:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.articles-page .articles-action .fa-icon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.articles-page .articles-refresh,
+.articles-page .articles-reader-directory {
+  width: 36px;
   padding: 0;
 }
 
-.articles-reader-directory {
+.articles-page .articles-reader-directory {
   display: none;
 }
 
@@ -110,18 +143,20 @@
 }
 
 .articles-sidebar > .articles-list {
-  padding-top: .5rem;
+  padding: .5rem .25rem 0;
 }
 
 .articles-item {
   display: block;
   width: 100%;
+  min-height: 60px;
   padding: .65rem .75rem;
-  margin-bottom: .25rem;
+  margin: 0 0 .35rem;
   background: transparent;
   color: inherit;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 6px;
+  line-height: 1.4;
   text-align: left;
   overflow-wrap: anywhere;
 }
@@ -135,6 +170,13 @@
 .articles-item-title,
 .articles-item-folder {
   display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.articles-item-title {
+  font-size: .95rem;
 }
 
 .articles-item-folder {
@@ -148,12 +190,6 @@
 }
 
 .articles-reading-options summary {
-  cursor: pointer;
-  gap: .3rem;
-  padding: 0 .75rem;
-  font-size: .85rem;
-  border: 1px solid rgba(160, 160, 160, .35);
-  border-radius: 6px;
   list-style: none;
 }
 
@@ -163,11 +199,12 @@
 
 .articles-reading-settings {
   position: absolute;
-  top: 100%;
+  top: calc(100% + .5rem);
   right: 0;
   z-index: 20;
   width: min(280px, calc(100vw - 1.5rem));
-  padding: .75rem;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
 .articles-encoding {
@@ -281,6 +318,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .articles-page .articles-action,
   .articles-drawer.fade .modal-dialog {
     transition: none;
   }
@@ -306,13 +344,20 @@
 
   .articles-reader-header {
     gap: .25rem;
+    padding: .25rem 0;
   }
 
-  .articles-reader-directory {
+  .articles-page .articles-reader-directory {
     display: flex;
   }
 
-  .articles-reading-options summary {
+  .articles-page .articles-action {
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .articles-page .articles-reader-directory,
+  .articles-page .articles-reading-options summary {
     width: 44px;
     padding: 0;
   }
