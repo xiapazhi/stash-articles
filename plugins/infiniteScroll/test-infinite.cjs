@@ -17,18 +17,23 @@ const locationListeners = new Set();
 const session = new Map();
 let route = '/images';
 let search = '';
+let locationKey = 0;
+let navigationAction = 'POP';
 let cache;
 let updateCache;
 let viewer;
 let renderer;
 
-function navigate(pathname, query, action) {
+function navigate(pathname, query, action, key = locationKey + 1) {
   route = pathname;
   search = query ? '?' + query.replace(/^\?/, '') : '';
+  locationKey = key;
+  navigationAction = action;
   for (const listener of locationListeners) listener(history.location, action);
 }
 const history = {
-  get location() { return {pathname: route, search}; },
+  get location() { return {pathname: route, search, key: String(locationKey)}; },
+  get action() { return navigationAction; },
   replace(location) { navigate(location.pathname, location.search, 'REPLACE'); },
   listen(listener) {
     locationListeners.add(listener);
@@ -81,7 +86,7 @@ context.window.PluginApi={React,
   utils:{StashService:{getClient:()=>client}},
   patch:{after:(name,callback)=>after.set(name,callback),instead:(name,callback)=>instead.set(name,callback)},
 };
-vm.runInNewContext(fs.readFileSync(path.join(__dirname,'infiniteScroll.js'),'utf8').replace(/\}\)\(\);\s*$/,'globalThis.testAPI={mergeItems,supportsRoute,prepareList};})();'),context);
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'infiniteScroll.js'),'utf8').replace(/\}\)\(\);\s*$/,'globalThis.testAPI={mergeItems,supportsRoute,prepareList,visitedListEntries};})();'),context);
 
 function filter(values={}) {
   return {currentPage:1,itemsPerPage:2,searchTerm:'',sortBy:'path',sortDirection:'ASC',randomSeed:-1,displayMode:0,
@@ -143,7 +148,7 @@ async function unmount() {await act(async()=>renderer?.unmount());renderer=null;
 async function intersect() {await act(async()=>{for(const observer of [...observers])observer.callback([{isIntersecting:true}]);});}
 async function respond(index,items,count=6) {const req=requests[index];const kind=req.options.query;const field=kind==='images'?'findImages':'findGalleries';await act(async()=>req.resolve({data:{[field]:{[kind]:items,count}}}));}
 async function click(label) {const button=renderer.root.findAllByType('button').find(item=>text(item)===label);assert(button,`Missing button ${label}`);await act(async()=>{button.props.onClick({preventDefault(){}});});}
-async function test(name,run) {route='/images';search='?sortby=path';session.clear();requests.length=0;writes.length=0;opened.length=0;viewer=null;try{await run();console.log('PASS',name);}finally{await unmount();}}
+async function test(name,run) {route='/images';search='?sortby=path';session.clear();context.testAPI.visitedListEntries.clear();requests.length=0;writes.length=0;opened.length=0;viewer=null;try{await run();console.log('PASS',name);}finally{await unmount();}}
 
 (async()=>{
   await test('all three lists reshuffle on opening and refreshing, preserving other filters',async()=>{
@@ -158,6 +163,8 @@ async function test(name,run) {route='/images';search='?sortby=path';session.cle
       assert.deepEqual(params.getAll('c'),['first','second']);
       assert.equal(params.has('p'),false);
       await unmount();
+      context.testAPI.visitedListEntries.clear();
+      navigationAction='POP';
       await mount({kind,followLocation:true});
       assert.notEqual(new URLSearchParams(search).get('sortby'),seed);
       await unmount();
@@ -196,6 +203,31 @@ async function test(name,run) {route='/images';search='?sortby=path';session.cle
     assert.equal(new URLSearchParams(applied).get('q'),'restored');
     await act(async()=>renderer.update(h(Fixture,{followLocation:true,total:9})));
     assert.equal(search,applied);
+  });
+  await test('closing the lightbox or returning from image details keeps the list order',async()=>{
+    for (const pathname of ['/images','/galleries/3']) {
+      navigate(pathname,'sortby=path&perPage=2','PUSH');
+      await mount({followLocation:true});
+      const original=history.location;
+      const originalKey=Number(original.key);
+      assert.match(original.search,/sortby=random_\d+/);
+
+      // The native lightbox pushes a duplicate of the list entry, then pops it on close.
+      await click('1');
+      await act(async()=>{
+        navigate(pathname,original.search,'POP',originalKey);
+        viewer.onClose();
+      });
+      assert.equal(search,original.search);
+      assert.equal(opened.length,pathname==='/images'?1:2);
+
+      await unmount();
+      navigate('/images/1','','PUSH');
+      navigate(pathname,original.search,'POP',originalKey);
+      await mount({followLocation:true});
+      assert.equal(search,original.search);
+      await unmount();
+    }
   });
   await test('supported routes exclude unrelated lists and details',async()=>{
     const {supportsRoute}=context.testAPI;
@@ -280,5 +312,5 @@ async function test(name,run) {route='/images';search='?sortby=path';session.cle
     await mount();await intersect();await respond(0,[],10);await intersect();assert.equal(requests.length,1);
     assert(text(renderer.toJSON()).includes('已到底部'));
   });
-  console.log('All 16 infinite-scroll component tests passed.');
+  console.log('All 17 infinite-scroll component tests passed.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

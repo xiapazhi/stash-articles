@@ -7,6 +7,7 @@
   const { Button, Alert } = api.libraries.Bootstrap;
   const { useHistory, useLocation } = api.libraries.ReactRouterDOM;
   const ListContext = React.createContext(null);
+  const visitedListEntries = new Set();
 
   function supportsRoute(path, kind) {
     if (kind === "galleries") return /^\/galleries\/?$/.test(path);
@@ -20,13 +21,22 @@
   function RandomSortOnOpen({ filter, setFilter }) {
     const history = useHistory();
     const location = useLocation();
-    const visit = React.useRef({ location, handled: false });
+    const visit = React.useRef({
+      location,
+      handled: history.action === "POP" && visitedListEntries.has(location.key),
+    });
 
     React.useLayoutEffect(() => history.listen((next, action) => {
-      // Native sorting, searching and filtering replace the current entry.
-      if (action !== "REPLACE" && next.pathname === location.pathname) {
-        visit.current = { location: next, handled: false };
+      if (next.pathname !== location.pathname) return;
+      if (action === "REPLACE") {
+        if (visit.current.handled && next.key) visitedListEntries.add(next.key);
+        return;
       }
+      // Stash closes the viewer with a history back to the same list entry.
+      visit.current = {
+        location: next,
+        handled: action === "POP" && visitedListEntries.has(next.key),
+      };
     }), [history, location.pathname]);
 
     React.useEffect(() => {
@@ -39,6 +49,7 @@
       if (requested.makeQueryParameters() !== filter.makeQueryParameters()) return;
 
       visit.current.handled = true;
+      if (location.key) visitedListEntries.add(location.key);
       const originalSort = new URLSearchParams(visit.current.location.search).get("sortby");
       const key = manualSortKey(location.pathname);
       if (originalSort && originalSort === window.sessionStorage.getItem(key) && originalSort === filter.sortBy) return;
