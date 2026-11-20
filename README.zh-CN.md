@@ -2,12 +2,13 @@
 
 [English](README.md) | 简体中文
 
-为 [Stash](https://github.com/stashapp/stash) 提供 TXT 阅读和移动端操作优化。两个插件可独立安装，也可配合使用。
+为 [Stash](https://github.com/stashapp/stash) 提供 TXT 阅读、移动端操作优化和图片自动加载。各插件可独立安装，也可配合使用。
 
 | 插件 | 功能 |
 | --- | --- |
 | [文章阅读](plugins/articles) | 在 Stash 中直接阅读指定目录及子目录中的 TXT 文件。 |
 | [移动端操作](plugins/mobileFilters) | 优化手机筛选、排序、显示方式和媒体播放入口。 |
+| [自动加载](plugins/infiniteScroll) | 滚动时自动追加下一页图片或图库。 |
 
 ## 环境要求
 
@@ -41,7 +42,7 @@
        └── mobileFilters.css
    ```
 
-   保持目录名和清单文件名不变。两个插件可分别启用、禁用。
+   保持目录名和清单文件名不变。各插件可分别启用、禁用。
 
 3. 使用文章插件时，编辑 `articles/reader.json`，设置 TXT 根目录：
 
@@ -82,6 +83,12 @@
 - 短片网格点击缩略图弹出原生播放器，点击标题进入详情页。
 
 桌面布局和详情页保留原生行为。移动端操作插件不改变文章阅读页布局。
+
+## 自动加载
+
+安装 `plugins/infiniteScroll` 后，`/images` 图片列表、`/galleries` 图库列表和图库内图片列表支持滚动追加下一页，手机和桌面均可使用。保留原生视图与图片查看器；批量选择期间暂停加载。加载失败可重试，已加载内容保留；筛选和排序沿用原生查询。
+
+将 `infiniteScroll/` 放在其他插件目录旁，重新加载插件并刷新即可。禁用并刷新后恢复原生分页。详见[插件说明](plugins/infiniteScroll/README.md)。
 
 ## 开发
 

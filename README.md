@@ -2,12 +2,13 @@
 
 English | [简体中文](README.zh-CN.md)
 
-A TXT reader and a mobile interface plugin for [Stash](https://github.com/stashapp/stash). Install either plugin independently, or use both together.
+TXT reading, mobile controls, and infinite scrolling for [Stash](https://github.com/stashapp/stash). Install each plugin independently or use them together.
 
 | Plugin | Description |
 | --- | --- |
 | [Articles](plugins/articles) | Read TXT files from nested directories directly in Stash. |
 | [Mobile UI](plugins/mobileFilters) | Touch-friendly filters, sorting, display controls, and media playback shortcuts. |
+| [Infinite scroll](plugins/infiniteScroll) | Automatically load more images and galleries as you scroll. |
 
 ## Requirements
 
@@ -41,7 +42,7 @@ No frontend build or npm installation is required to use the plugins.
        └── mobileFilters.css
    ```
 
-   Keep the directory and manifest names unchanged. The two plugins can be enabled or disabled separately.
+   Keep the directory and manifest names unchanged. Each plugin can be enabled or disabled separately.
 
 3. For Articles, edit `articles/reader.json` to select your TXT directory:
 
@@ -82,6 +83,12 @@ Mobile UI applies at viewport widths **below 768px** to the main lists for scene
 - Tap a scene thumbnail in grid view to open the native player in a modal; tap its title for details.
 
 Desktop layouts and detail pages retain their native behavior. The Mobile UI plugin does not change the Articles layout.
+
+## Infinite scroll
+
+Install `plugins/infiniteScroll` to automatically append pages in `/images`, `/galleries`, and the image list inside a gallery. It works on phones and desktops and retains native views and image viewing. Loading pauses during selection; failed requests can be retried without losing loaded content. Filtering and sorting retain their native query behavior.
+
+Copy the `infiniteScroll/` directory alongside the other plugins, reload plugins, and refresh. Disabling it and refreshing restores pagination. See [the plugin guide](plugins/infiniteScroll/README.md) for details.
 
 ## Development
 

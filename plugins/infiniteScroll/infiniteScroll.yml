@@ -1,0 +1,8 @@
+name: 图片与图库自动加载
+description: 图片列表、图库列表和图库内图片滚动到底部时自动追加下一页。
+version: 0.1.0
+ui:
+  javascript:
+    - infiniteScroll.js
+  css:
+    - infiniteScroll.css
