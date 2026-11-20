@@ -13,11 +13,33 @@ const observers = new Set();
 const requests = [];
 const writes = [];
 const opened = [];
+const locationListeners = new Set();
+const session = new Map();
 let route = '/images';
+let search = '';
 let cache;
 let updateCache;
 let viewer;
 let renderer;
+
+function navigate(pathname, query, action) {
+  route = pathname;
+  search = query ? '?' + query.replace(/^\?/, '') : '';
+  for (const listener of locationListeners) listener(history.location, action);
+}
+const history = {
+  get location() { return {pathname: route, search}; },
+  replace(location) { navigate(location.pathname, location.search, 'REPLACE'); },
+  listen(listener) {
+    locationListeners.add(listener);
+    return () => locationListeners.delete(listener);
+  },
+};
+function useTestLocation() {
+  const [, render] = React.useReducer(count => count + 1, 0);
+  React.useLayoutEffect(() => history.listen(render), []);
+  return history.location;
+}
 
 class Observer {
   constructor(callback) { this.callback = callback; }
@@ -41,10 +63,19 @@ function useLightbox(state) {
 }
 const context = {
   console:{info(){},error(){}},
-  window:{IntersectionObserver:Observer,location:{get pathname(){return route;}}},
+  window:{
+    IntersectionObserver:Observer,
+    location:{get pathname(){return route;}},
+    sessionStorage:{
+      getItem:key=>session.get(key)??null,
+      setItem:(key,value)=>session.set(key,value),
+      removeItem:key=>session.delete(key),
+    },
+  },
+  URLSearchParams, setTimeout, clearTimeout,
 };
 context.window.PluginApi={React,
-  libraries:{Bootstrap:{Button,Alert:({children,...props})=>h('aside',props,children)},ReactRouterDOM:{useLocation:()=>({pathname:route})}},
+  libraries:{Bootstrap:{Button,Alert:({children,...props})=>h('aside',props,children)},ReactRouterDOM:{useLocation:useTestLocation,useHistory:()=>history}},
   hooks:{useLightbox},
   GQL:{FindImagesDocument:'images',FindGalleriesDocument:'galleries'},
   utils:{StashService:{getClient:()=>client}},
@@ -53,9 +84,28 @@ context.window.PluginApi={React,
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'infiniteScroll.js'),'utf8').replace(/\}\)\(\);\s*$/,'globalThis.testAPI={mergeItems,supportsRoute,prepareList};})();'),context);
 
 function filter(values={}) {
-  return {currentPage:1,itemsPerPage:2,searchTerm:'',sortBy:'path',sortDirection:'ASC',displayMode:0,
+  return {currentPage:1,itemsPerPage:2,searchTerm:'',sortBy:'path',sortDirection:'ASC',randomSeed:-1,displayMode:0,
     makeFindFilter(){return {page:this.currentPage,per_page:this.itemsPerPage,q:this.searchTerm,sort:this.sortBy,direction:this.sortDirection};},
     makeFilter(){return this.criteria||{};},
+    empty(){return filter();},
+    configureFromQueryString(query){
+      this.params=new URLSearchParams(query);
+      const sort=this.params.get('sortby')||'path';
+      this.sortBy=sort.startsWith('random_')?'random':sort;
+      this.randomSeed=this.sortBy==='random'?Number(sort.split('_')[1]):-1;
+      this.currentPage=Number(this.params.get('p')||1);
+      this.itemsPerPage=Number(this.params.get('perPage')||2);
+      this.searchTerm=this.params.get('q')||'';
+    },
+    makeQueryParameters(){
+      const params=new URLSearchParams(this.params);
+      params.set('sortby',this.sortBy==='random'?`random_${this.randomSeed}`:this.sortBy);
+      if(this.currentPage>1)params.set('p',this.currentPage);
+      else params.delete('p');
+      return params.toString();
+    },
+    setSortBy(sortBy){return filter({...this,sortBy,currentPage:1});},
+    reshuffleRandomSort(){return filter({...this,randomSeed:-1,currentPage:1});},
     clone(){return filter({...this});},...values};
 }
 function ImageGrid(props) {return h('div',{className:'test-grid',items:props.images},props.images.map((item,index)=>h('button',{key:item.id,onClick:event=>props.onPreview(index,event)},item.id)));}
@@ -66,14 +116,24 @@ function NativeImages(props) {
   return after.get('ImageList')(props,{},h(ImageGrid,{images:props.images,onPreview(){}}));
 }
 function NativeGalleries(props) {return h(GalleryGrid,props);}
+function NativeToolbar() { return null; }
 const initialItems=[{id:'1'},{id:'2'}];
-function Fixture({kind='images',model,selected=false,filterHook,total=6}) {
+function Fixture({kind='images',model,selected=false,filterHook,total=6,followLocation=false}) {
+  const location=useTestLocation();
+  if(followLocation){
+    model=filter();
+    model.configureFromQueryString(location.search);
+  }
   const field=kind==='images'?'findImages':'findGalleries';
   const [data,setData]=React.useState(()=>({[field]:{[kind]:initialItems,count:total}}));
   cache=data;updateCache=setData;
   const props={filter:model,[kind]:data[field][kind],totalCount:kind==='images'?data[field].count:undefined,selectedIds:new Set(selected?['1']:[])};
   const list=kind==='images'?h(NativeImages,props):instead.get('GalleryList')(props,{},NativeGalleries);
-  const tree=h('div',{className:'item-list-container image-list'},list,h('span',{totalItems:data[field].count,itemsPerPage:2},'native pagination'));
+  const toolbar=h(NativeToolbar,{
+    filter:model,listSelect:{},
+    setFilter(next){history.replace({pathname:route,search:next.makeQueryParameters()});},
+  });
+  const tree=h('div',{className:'item-list-container image-list'},toolbar,list,h('span',{totalItems:data[field].count,itemsPerPage:2},'native pagination'));
   return after.get(kind==='images'?'FilteredImageList':'FilteredGalleryList')({filterHook},{},tree);
 }
 function ids(items) {return Array.from(items,item=>item.id);}
@@ -83,9 +143,60 @@ async function unmount() {await act(async()=>renderer?.unmount());renderer=null;
 async function intersect() {await act(async()=>{for(const observer of [...observers])observer.callback([{isIntersecting:true}]);});}
 async function respond(index,items,count=6) {const req=requests[index];const kind=req.options.query;const field=kind==='images'?'findImages':'findGalleries';await act(async()=>req.resolve({data:{[field]:{[kind]:items,count}}}));}
 async function click(label) {const button=renderer.root.findAllByType('button').find(item=>text(item)===label);assert(button,`Missing button ${label}`);await act(async()=>{button.props.onClick({preventDefault(){}});});}
-async function test(name,run) {route='/images';requests.length=0;writes.length=0;opened.length=0;viewer=null;try{await run();console.log('PASS',name);}finally{await unmount();}}
+async function test(name,run) {route='/images';search='?sortby=path';session.clear();requests.length=0;writes.length=0;opened.length=0;viewer=null;try{await run();console.log('PASS',name);}finally{await unmount();}}
 
 (async()=>{
+  await test('all three lists reshuffle on opening and refreshing, preserving other filters',async()=>{
+    for(const [pathname,kind] of [['/images','images'],['/galleries','galleries'],['/galleries/3','images']]) {
+      navigate(pathname,'sortby=path&q=rose&perPage=2&c=first&c=second&p=4','PUSH');
+      await mount({kind,followLocation:true});
+      const params=new URLSearchParams(search);
+      const seed=params.get('sortby');
+      assert.match(seed,/^random_\d+$/);
+      assert.equal(params.get('q'),'rose');
+      assert.equal(params.get('perPage'),'2');
+      assert.deepEqual(params.getAll('c'),['first','second']);
+      assert.equal(params.has('p'),false);
+      await unmount();
+      await mount({kind,followLocation:true});
+      assert.notEqual(new URLSearchParams(search).get('sortby'),seed);
+      await unmount();
+    }
+  });
+  await test('same-route opening reshuffles while manual sort and native list updates take priority',async()=>{
+    await mount({followLocation:true});
+    await act(async()=>{
+      navigate('/images','','PUSH');
+      history.replace({pathname:'/images',search:'sortby=title&q=saved'});
+    });
+    const params=new URLSearchParams(search);
+    const seed=params.get('sortby');
+    assert.match(seed,/^random_\d+$/);
+    assert.equal(params.get('q'),'saved');
+    await act(async()=>{
+      history.replace({pathname:'/images',search:`sortby=${seed}&q=filtered`});
+      await intersect();
+    });
+    assert.equal(new URLSearchParams(search).get('sortby'),seed);
+    await act(async()=>{
+      renderer.root.findByType(NativeToolbar).props.setFilter(current=>filter({...current,sortBy:'date'}));
+    });
+    await unmount();
+    await mount({followLocation:true});
+    assert.equal(new URLSearchParams(search).get('sortby'),'date');
+  });
+  await test('waits for the native filter to restore the URL and updates it only once',async()=>{
+    navigate('/images','sortby=random_100&perPage=2&q=restored','PUSH');
+    await mount({model:filter()});
+    assert.equal(search,'?sortby=random_100&perPage=2&q=restored');
+    await act(async()=>renderer.update(h(Fixture,{followLocation:true})));
+    const applied=search;
+    assert.match(applied,/sortby=random_\d+/);
+    assert.notEqual(applied,'?sortby=random_100&perPage=2&q=restored');
+    assert.equal(new URLSearchParams(applied).get('q'),'restored');
+    await act(async()=>renderer.update(h(Fixture,{followLocation:true,total:9})));
+    assert.equal(search,applied);
+  });
   await test('supported routes exclude unrelated lists and details',async()=>{
     const {supportsRoute}=context.testAPI;
     assert(supportsRoute('/images','images'));assert(supportsRoute('/galleries/3','images'));assert(supportsRoute('/galleries','galleries'));
@@ -144,10 +255,12 @@ async function test(name,run) {route='/images';requests.length=0;writes.length=0
     assert.equal(renderer.root.findByType(GalleryGrid).props.galleries.length,4);
   });
   await test('clicking a newly loaded image opens the correct native viewer page and index',async()=>{
-    await mount();await intersect();await respond(0,[{id:'3'},{id:'4'}]);await click('4');
+    const seed='random_12345';
+    await mount({model:filter({sortBy:seed})});await intersect();await respond(0,[{id:'3'},{id:'4'}]);await click('4');
     assert.equal(opened[0].page,2);assert.equal(opened[0].initialIndex,1);
     assert.deepEqual(ids(opened[0].images),['3','4']);
     await act(async()=>{viewer.pageCallback({direction:1});});await respond(1,[{id:'5'},{id:'6'}]);
+    assert.deepEqual(requests.map(request=>request.options.variables.filter.sort),[seed,seed]);
     assert.equal(viewer.page,3);assert.deepEqual(ids(viewer.images),['5','6']);
     assert.equal(cache.findImages.images.length,4);
   });
@@ -167,5 +280,5 @@ async function test(name,run) {route='/images';requests.length=0;writes.length=0
     await mount();await intersect();await respond(0,[],10);await intersect();assert.equal(requests.length,1);
     assert(text(renderer.toJSON()).includes('已到底部'));
   });
-  console.log('All 13 infinite-scroll component tests passed.');
+  console.log('All 16 infinite-scroll component tests passed.');
 })().catch(error=>{console.error(error);process.exitCode=1;});

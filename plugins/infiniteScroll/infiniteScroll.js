@@ -5,12 +5,55 @@
   const React = api.React;
   const h = React.createElement;
   const { Button, Alert } = api.libraries.Bootstrap;
-  const { useLocation } = api.libraries.ReactRouterDOM;
+  const { useHistory, useLocation } = api.libraries.ReactRouterDOM;
   const ListContext = React.createContext(null);
 
   function supportsRoute(path, kind) {
     if (kind === "galleries") return /^\/galleries\/?$/.test(path);
     return /^\/images\/?$/.test(path) || /^\/galleries\/\d+\/?$/.test(path);
+  }
+
+  function manualSortKey(pathname) {
+    return `infiniteScroll:manualSort:${pathname.replace(/\/$/, "")}`;
+  }
+
+  function RandomSortOnOpen({ filter, setFilter }) {
+    const history = useHistory();
+    const location = useLocation();
+    const visit = React.useRef({ location, handled: false });
+
+    React.useLayoutEffect(() => history.listen((next, action) => {
+      // Native sorting, searching and filtering replace the current entry.
+      if (action !== "REPLACE" && next.pathname === location.pathname) {
+        visit.current = { location: next, handled: false };
+      }
+    }), [history, location.pathname]);
+
+    React.useEffect(() => {
+      if (visit.current.handled || !filter || !location.search) return;
+      if (history.location.pathname !== location.pathname || history.location.search !== location.search) return;
+
+      // Let Stash restore the URL and its saved defaults before applying a new sort.
+      const requested = filter.empty();
+      requested.configureFromQueryString(location.search);
+      if (requested.makeQueryParameters() !== filter.makeQueryParameters()) return;
+
+      visit.current.handled = true;
+      const originalSort = new URLSearchParams(visit.current.location.search).get("sortby");
+      const key = manualSortKey(location.pathname);
+      if (originalSort && originalSort === window.sessionStorage.getItem(key) && originalSort === filter.sortBy) return;
+      window.sessionStorage.removeItem(key);
+
+      const next = filter.setSortBy("random").reshuffleRandomSort();
+      const seedLimit = 100_000_000;
+      let seed = Math.floor(Math.random() * seedLimit);
+      if (seed === filter.randomSeed) seed = (seed + 1) % seedLimit;
+      next.randomSeed = seed;
+      setFilter(next);
+      console.info("[自动加载] 已更新本次浏览的随机顺序", location.pathname);
+    }, [filter, history, location, setFilter]);
+
+    return null;
   }
 
   function prepareList(tree, bindings) {
@@ -26,6 +69,19 @@
     }
     if (typeof tree.type === "string" && /\bitem-list-container\b/.test(tree.props.className || "")) {
       props.className = tree.props.className + " sis-page";
+    }
+    const { filter, listSelect, setFilter } = tree.props;
+    if (bindings.pathname && filter && listSelect && typeof setFilter === "function") {
+      bindings.toolbar = { filter, setFilter };
+      props.setFilter = (value) => {
+        const next = typeof value === "function" ? value(filter) : value;
+        if (next.sortBy !== filter.sortBy || next.sortDirection !== filter.sortDirection) {
+          const key = manualSortKey(bindings.pathname);
+          if (next.sortBy && next.sortBy !== "random") window.sessionStorage.setItem(key, next.sortBy);
+          else window.sessionStorage.removeItem(key);
+        }
+        setFilter(next);
+      };
     }
     if (tree.props.children !== undefined) {
       props.children = prepareList(tree.props.children, bindings);
@@ -259,9 +315,15 @@
     api.patch.after(name, (...args) => {
       const tree = args[args.length - 1];
       if (!supportsRoute(window.location.pathname, kind)) return tree;
-      const scope = { filterHook: args[0].filterHook, totalCount: 0 };
+      const scope = {
+        filterHook: args[0].filterHook,
+        pathname: args[0].alterQuery !== false ? window.location.pathname : undefined,
+        totalCount: 0,
+      };
       const content = prepareList(tree, scope);
-      return h(ListContext.Provider, { value: scope }, content);
+      return h(ListContext.Provider, { value: scope },
+        scope.pathname && h(RandomSortOnOpen, { key: scope.pathname, ...scope.toolbar }),
+        content);
     });
   }
   api.patch.after("ImageList", (...args) => h(ListEntry, { source: args[0], tree: args[args.length - 1], kind: "images" }));
