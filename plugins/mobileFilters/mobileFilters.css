@@ -368,3 +368,13 @@
     }
   }
 }
+@media (pointer: coarse) and (hover: none) {
+  .Lightbox .Lightbox-display {
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .Lightbox .smf-gesture-zoom {
+    transform: var(--smf-gesture-transform) !important;
+  }
+}

@@ -39,6 +39,7 @@ No frontend build or npm installation is required to use the plugins.
    └── mobileFilters/
        ├── mobileFilters.yml
        ├── mobileFilters.js
+       ├── lightboxGestures.js
        └── mobileFilters.css
    ```
 
@@ -80,6 +81,7 @@ Mobile UI applies at viewport widths **below 768px** to the main lists for scene
 - Reset filter criteria while keeping the search term, sort order, and display mode.
 - Horizontally scrollable active filter chips and native bulk-selection controls.
 - Tap an image thumbnail in grid view to open Stash's lightbox; tap its title for details.
+- On touchscreens, swipe horizontally in the lightbox to change images, double-tap or pinch to zoom, and drag to pan while zoomed.
 - Tap a scene thumbnail in grid view to open the native player in a modal; tap its title for details.
 
 Desktop layouts and detail pages retain their native behavior. The Mobile UI plugin does not change the Articles layout.
